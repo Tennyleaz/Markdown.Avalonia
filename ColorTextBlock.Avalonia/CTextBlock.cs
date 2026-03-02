@@ -1,4 +1,4 @@
-﻿
+
 using Avalonia;
 using Avalonia.Automation.Peers;
 using Avalonia.Collections;
@@ -1005,44 +1005,26 @@ namespace ColorTextBlock.Avalonia
                 return string.Empty;
             }
 
-            TextPointer bgn, end;
-            if (_beginSelect < _endSelect)
+            // Normalize selection to global text indices
+            int from = Math.Min(_beginSelect.Index, _endSelect.Index);
+            int to = Math.Max(_beginSelect.Index, _endSelect.Index);
+
+            string text = Text;
+
+            // Clamp to available text range for safety
+            if (from < 0) 
+                from = 0;
+            if (to > text.Length) 
+                to = text.Length;
+
+            // Guard for 0 or negative length
+            int length = to - from;
+            if (length <= 0)
             {
-                bgn = _beginSelect;
-                end = _endSelect;
-            }
-            else
-            {
-                bgn = _endSelect;
-                end = _beginSelect;
+                return string.Empty;
             }
 
-            if (ReferenceEquals(bgn.Geometry, end.Geometry))
-            {
-                if (bgn.Geometry is TextLineGeometry tlg)
-                {
-                    return tlg.Text.Substring(bgn.InternalIndex, end.InternalIndex - bgn.InternalIndex);
-                }
-                else return "";
-            }
-            else
-            {
-                var buffer = new StringBuilder();
-
-                if (bgn.Geometry is TextLineGeometry btlg)
-                    buffer.Append(btlg.Text.Substring(bgn.InternalIndex));
-
-                foreach (var inter in _intermediates)
-                {
-                    if (inter is TextLineGeometry itlg)
-                        buffer.Append(itlg.ToString());
-                }
-
-                if (end.Geometry is TextLineGeometry etlg)
-                    buffer.Append(etlg.Text.Substring(etlg.Line.FirstTextSourceIndex, end.InternalIndex - etlg.Line.FirstTextSourceIndex));
-
-                return buffer.ToString();
-            }
+            return text.Substring(from, length);
         }
     }
 

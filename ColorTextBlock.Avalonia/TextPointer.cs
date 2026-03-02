@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using ColorTextBlock.Avalonia.Geometries;
 using System;
 using System.Collections.Generic;
@@ -34,6 +34,7 @@ namespace ColorTextBlock.Avalonia
             _path = new[] { inline };
             Geometry = target;
 
+            // Treat Index as the caret position (exclusive end), so we must include TrailingLength so rightmost character won't be missed.
             if (isLast)
             {
                 var lastIdx = charHit.FirstCharacterIndex + charHit.TrailingLength;
@@ -43,7 +44,8 @@ namespace ColorTextBlock.Avalonia
             }
             else
             {
-                Index = charHit.FirstCharacterIndex - target.Line.FirstTextSourceIndex;
+                var caretIdx = charHit.FirstCharacterIndex + charHit.TrailingLength;
+                Index = caretIdx - target.Line.FirstTextSourceIndex;
                 InternalIndex = charHit.FirstCharacterIndex;
                 TrailingLength = charHit.TrailingLength;
             }
